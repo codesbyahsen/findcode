@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Validation</title>
+</head>
+<body>
+
+    <h1>JS Run Time Validation</h1>
+
+    <form action="#" method="post">
+        <input type="text" class="username" placeholder="username"> <br>
+        <span class="errorUser"></span> <br>
+        <input type="text" class="email" placeholder="email"> <br>
+        <span class="errorEmail"></span> <br>
+        <input type="password" class="password" placeholder="password"> <br>
+        <span class="errorPS"></span> <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        var user = document.querySelector(".username");
+        var email = document.querySelector(".email");
+        var password = document.querySelector(".password");
+        var euser = document.querySelector(".errorUser");
+        var eemail = document.querySelector(".errorEmail");
+        var epassword = document.querySelector(".errorPS");
+
+        user.addEventListener("keyup", userValidate);
+        function userValidate() {
+            if(user.value == "") {
+                euser.innerHTML = "Username is required!";
+                euser.style.color  = "red";
+            }
+            else {
+                euser.innerHTML = "";
+            }
+        }
+
+        email.addEventListener("keyup", emailValidate);
+        function emailValidate() {
+            let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+            if(email.value == "") {
+                eemail.innerHTML = "Email is required!";
+                eemail.style.color  = "red";
+            }
+            else if(!email.value.match(regexEmail)) {
+                eemail.innerHTML = "Enter a valid Email!";
+                eemail.style.color  = "red";
+            }
+            else {
+                eemail.innerHTML = "";
+            }
+        }
+
+        password.addEventListener("keyup", psValidate);
+        function psValidate() {
+            if(password.value == "") {
+                epassword.innerHTML = "Password is required!";
+                epassword.style.color  = "red";
+            }
+            else {
+                epassword.innerHTML = "";
+            }
+        }
+    </script>
+</body>
+</html>

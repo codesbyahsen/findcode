@@ -1,0 +1,71 @@
+public function metaInfo($url)
+    {
+        $this->source = $url;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_URL, $this->source);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        // Load HTML to DOM Object
+        $dom = new DOMDocument();
+        @$dom->loadHTML($data);
+
+        // Parse DOM to get Favicon
+        $links = $dom->getElementsByTagName('link');
+        $favicon = '';
+
+        for ($i = 0; $i < $links->length; $i++) {
+            $link = $links->item($i);
+            if ($link->getAttribute('rel') == 'icon' || $link->getAttribute('rel') == "Shortcut Icon" || $link->getAttribute('rel') == "shortcut icon") {
+                $favicon = $link->getAttribute('href');
+            }
+        }
+
+        // Get image
+        $content = file_get_contents($favicon);
+        // Get image name from the source
+        $name = substr($favicon, strrpos($favicon, '/') + 1);
+        Storage::put($name, $content);
+
+        // Parse DOM to get Title
+        $nodes = $dom->getElementsByTagName('title');
+        $title = '';
+        if ($nodes->length > 0) {
+            $title = $nodes->item(0)->nodeValue;
+        }
+        // Parse DOM to get Meta Description
+        $metas = $dom->getElementsByTagName('meta');
+        $body = "";
+        $imageURL = "";
+        for ($i = 0; $i < $metas->length; $i++) {
+            $meta = $metas->item($i);
+            if ($meta->getAttribute('name') == 'Description' || $meta->getAttribute('name') == 'description') {
+                $body = $meta->getAttribute('content');
+            }
+            if ($meta->getAttribute('property') == 'og:image:url') {
+                $imageURL = $meta->getAttribute('content');
+            } elseif ($meta->getAttribute('property') == 'og:image') {
+                $imageURL = $meta->getAttribute('content');
+            }
+        }
+
+        $images = $dom->getElementsByTagName('img');
+
+        if (!isset($imageURL) && $images->length > 0) {
+            $imageURL = $images->item(0)->getAttribute('src');
+        }
+
+        $output =  array(
+            'title' => $title,
+            'favicon' => $favicon,
+            'image_url' => $imageURL,
+            'description' => preg_replace('/[^\00-\255]+/u', '', $body)
+        );
+
+        $this->thumbnail = $output['favicon' ?? 'image_url'];
+        $this->title = $output['title'];
+        $this->description = $output['description'];
+    }
